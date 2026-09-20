@@ -269,7 +269,7 @@
 </header>
 
 <div class="notice">
-  <span><b>試作品：</b>下の4つのノートに書いてある範囲でしか答えません。載っていないことは「載っていません」と答え、推測はしません。ノート自体はAIが要約した下書きで、医師の最終確認前です。回答をそのまま診療に使わないでください。</span>
+  <span><b>試作品：</b>基本は下の4つのノートに書いてある範囲で答えますが、ノートに無い場合はPubMed（実際の医学論文）も検索して答えることがあります。推測では答えません。ノート自体はAIが要約した下書きで、医師の最終確認前です。回答をそのまま診療に使わないでください。</span>
 </div>
 
 <div class="layout">
@@ -359,6 +359,19 @@
       if(seen[key]) continue;
       seen[key] = true;
       found.push({id:m[1], page:m[2]});
+    }
+    return found;
+  }
+
+  // PubMed由来の出典（例: 「PubMed PMID 12345678」）を拾う
+  function parsePubmedCitations(text){
+    var re = /PMID[:\s]*([0-9]{4,9})/gi;
+    var found = [], seen = {};
+    var m;
+    while((m = re.exec(text))){
+      if(seen[m[1]]) continue;
+      seen[m[1]] = true;
+      found.push(m[1]);
     }
     return found;
   }
@@ -475,6 +488,8 @@
         hasAction = true;
       }
 
+      var pubmedCites = opts.example ? [] : parsePubmedCitations(text);
+
       if(cites.length){
         var wrap = document.createElement('div');
         wrap.className = 'cites';
@@ -488,7 +503,27 @@
         });
         actionsRow.appendChild(wrap);
         hasAction = true;
-      } else if(!opts.example){
+      }
+
+      if(pubmedCites.length){
+        var pwrap = document.createElement('div');
+        pwrap.className = 'cites';
+        pubmedCites.forEach(function(pmid){
+          var pb = document.createElement('button');
+          pb.className = 'cite-chip';
+          pb.type = 'button';
+          pb.title = 'PubMedで開く（別タブ）';
+          pb.textContent = 'PubMed ' + pmid;
+          pb.addEventListener('click', function(){
+            window.open('https://pubmed.ncbi.nlm.nih.gov/' + pmid + '/', '_blank', 'noopener');
+          });
+          pwrap.appendChild(pb);
+        });
+        actionsRow.appendChild(pwrap);
+        hasAction = true;
+      }
+
+      if(!cites.length && !pubmedCites.length && !opts.example){
         var tagEl = document.createElement('span');
         tagEl.className = 'no-source';
         tagEl.textContent = '出典の記載なし（ノート範囲外の可能性）';
