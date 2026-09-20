@@ -44,7 +44,7 @@ export default async function handler(req, res) {
         // 精度が大事な用途なので既定はSonnet。費用を抑えたい場合は
         // 'claude-haiku-4-5-20251001' に変更できる（README参照）。
         model: 'claude-sonnet-5',
-        max_tokens: 1024,
+        max_tokens: 2048,
         system,
         messages
       })
@@ -61,7 +61,16 @@ export default async function handler(req, res) {
       return;
     }
 
-    const text = (data.content && data.content[0] && data.content[0].text) || '';
+    // content配列の中から本文（type: "text"）のブロックを探す。
+    // 先頭が必ず本文とは限らない（他の種類のブロックが先に来ることがある）ため、
+    // インデックス0決め打ちではなく type で探す。
+    let text = '';
+    if (Array.isArray(data.content)) {
+      const textBlock = data.content.find(function (block) {
+        return block && block.type === 'text' && typeof block.text === 'string';
+      });
+      if (textBlock) text = textBlock.text;
+    }
     res.status(200).json({ text });
   } catch (err) {
     res.status(500).json({ error: 'server_error', message: String(err && err.message ? err.message : err) });
