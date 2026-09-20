@@ -691,7 +691,7 @@
 
   sendBtn.addEventListener('click', handleSend);
   input.addEventListener('keydown', function(e){
-    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); handleSend(); }
+    if(e.key === 'Enter' && e.shiftKey){ e.preventDefault(); handleSend(); }
   });
   input.addEventListener('input', function(){
     input.style.height = 'auto';
@@ -716,7 +716,7 @@
     renderNoteList();
     systemPrompt = buildSystemPrompt();
     seedExample();
-    hint.textContent = '🎤で音声入力／Enterで送信・Shift+Enterで改行／回答横の🔈で読み上げ';
+    hint.textContent = '🎤で音声入力／Shift+Enterで送信・Enterで改行／回答横の🔈で読み上げ';
   }
 
   init();
