@@ -1,0 +1,7 @@
+{
+  "name": "af-mondouchou",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "心房細動ノートだけを根拠に、出典つきで答えるAIチャット（自分専用の試作アプリ）"
+}
